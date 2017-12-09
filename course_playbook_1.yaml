@@ -1,0 +1,23 @@
+---
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: DEFINE PROVIDER
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "cisco"
+        password: "cisco"
+        auth_pass: "cisco"
+
+  - name: RUN 'SHOW VERSION'
+    ios_command:
+      provider: "{{ provider }}"
+      commands:
+        - show version
+    register: version
+
+  - debug: var=version.stdout_lines
+

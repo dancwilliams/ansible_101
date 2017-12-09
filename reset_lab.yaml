@@ -1,0 +1,44 @@
+---
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: DEFINE PROVIDER
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "cisco"
+        password: "cisco"
+        auth_pass: "cisco"
+
+  - name: RUN 'SHOW VERSION'
+    ios_command:
+      provider: "{{ provider }}"
+      commands:
+        - show version
+      wait_for:
+        - result[0] contains IOS
+
+  - name: REMOVE NTP SERVERS
+    ios_config:
+      provider: "{{ provider }}"
+      authorize: yes
+      lines:
+        - no ntp
+
+  - name: REMOVE ACL TEST
+    ios_config:
+      provider: "{{ provider }}"
+      authorize: yes
+      lines:
+        - no ip access-list extended TEST
+
+  - name: REMOVE INTERFACE IP AND SHUT
+    ios_config:
+      provider: "{{ provider }}"
+      authorize: yes
+      lines:
+        - no ip address
+        - shutdown
+      parents: ['interface gigabitethernet0/1']

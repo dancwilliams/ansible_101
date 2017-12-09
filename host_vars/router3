@@ -1,0 +1,5 @@
+---
+
+gigabitethernet0_1_IP: 10.3.3.1
+attached_server_ip: 10.3.3.10
+

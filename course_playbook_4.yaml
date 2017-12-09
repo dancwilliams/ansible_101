@@ -1,0 +1,48 @@
+---
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: DEFINE PROVIDER
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "cisco"
+        password: "cisco"
+        auth_pass: "cisco"
+
+  - name: RUN 'SHOW VERSION'
+    ios_command:
+      provider: "{{ provider }}"
+      commands:
+        - show version
+      wait_for:
+        - result[0] contains IOS
+
+  - name: RUN 'SHOW RUN NTP'
+    ios_command:
+      provider: "{{ provider }}"
+      authorize: yes
+      commands:
+        - sh run | in ntp
+    register: before_ntp
+
+  - debug: var=before_ntp.stdout_lines
+
+  - name: ADD NTP SERVER
+    ios_config:
+      provider: "{{ provider }}"
+      authorize: yes
+      lines:
+        - ntp server {{ ntp_server }}
+
+  - name: RUN 'SHOW RUN NTP'
+    ios_command:
+      provider: "{{ provider }}"
+      authorize: yes
+      commands:
+        - sh run | in ntp
+    register: after_ntp
+
+  - debug: var=after_ntp.stdout_lines

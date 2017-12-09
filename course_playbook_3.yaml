@@ -1,0 +1,60 @@
+---
+- hosts: all
+  gather_facts: no
+  connection: local
+
+  tasks:
+  - name: DEFINE PROVIDER
+    set_fact:
+      provider:
+        host: "{{ inventory_hostname }}"
+        username: "cisco"
+        password: "cisco"
+        auth_pass: "cisco"
+
+  - name: RUN 'SHOW VERSION'
+    ios_command:
+      provider: "{{ provider }}"
+      commands:
+        - show version
+      wait_for:
+        - result[0] contains IOS
+
+  - name: RUN 'SHOW RUN INTERFACE'
+    ios_command:
+      provider: "{{ provider }}"
+      authorize: yes
+      commands:
+        - show run interface gigabitethernet0/1
+    register: before_interface
+
+  - debug: var=before_interface.stdout_lines
+
+  - name: ADD IP TO GigabitEthernet0/1
+    ios_config:
+      provider: "{{ provider }}"
+      authorize: yes
+      lines:
+        - ip address {{ gigabitethernet0_1_IP }} 255.255.255.0
+        - no shutdown
+      parents: ['interface gigabitethernet0/1']
+      match: exact
+
+  - name: RUN 'SHOW RUN INTERFACE'
+    ios_command:
+      provider: "{{ provider }}"
+      authorize: yes
+      commands:
+        - show run interface gigabitethernet0/1
+    register: after_interface
+
+  - debug: var=after_interface.stdout_lines
+
+  - name: RUN PING AGAINST ATTACHED SERVER
+    ios_command:
+      provider: "{{ provider }}"
+      authorize: yes
+      commands:
+        - ping {{ attached_server_ip }}
+      wait_for: result[0] contains !
+
