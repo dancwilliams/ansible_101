@@ -38,7 +38,6 @@
         - ip address {{ gigabitethernet0_1_IP }} 255.255.255.0
         - no shutdown
       parents: ['interface gigabitethernet0/1']
-      match: exact
 
   - name: RUN 'SHOW RUN INTERFACE'
     ios_command:
