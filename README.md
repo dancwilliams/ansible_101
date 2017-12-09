@@ -1,7 +1,7 @@
 Intro to Ansible for Networkers
 ===============================
 
-Twitter: @dancwilliams
+Twitter: [@dancwilliams](https://twitter.com/dancwilliams)
 
 Links mentioned in video:
 
